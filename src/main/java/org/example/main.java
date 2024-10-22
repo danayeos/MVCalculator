@@ -1,128 +1,81 @@
-package org.example;
-
-import org.example.Assig.Chain_of_responsibility.PaymentA;
-import org.example.Assig.Chain_of_responsibility.PaymentB;
-import org.example.Assig.Chain_of_responsibility.PaymentC;
-import org.example.Assig.Chain_of_responsibility.PaymentHandler;
-
-import org.example.Assig.Command.*;
-
-import org.example.Assig.Iterator.Iterator;
-import org.example.Assig.Iterator.ListMovieCollection;
-import org.example.Assig.Iterator.ArrayMovieCollection;
-
-import org.example.Assig.Mediator.*;
-
-import org.example.Assig.Memento.TextEditor;
-import org.example.Assig.Memento.Caretaker;
-
-import java.util.Arrays;
-import java.util.List;
+import Assignment4.Observer.*;
+import Assignment4.State.Player;
+import Assignment4.Strategy.*;
+import Assignment4.TemplateMethod.*;
+import Assignment4.Visitor.*;
 
 public class Main {
     public static void main(String[] args) {
-        // 1. Цепочка ответственности (Chain of Responsibility)
-        // Создаем обработчики платежей A, B и C.
-        PaymentHandler paymentA = new PaymentA();
-        PaymentHandler paymentB = new PaymentB();
-        PaymentHandler paymentC = new PaymentC();
+        // 1. Паттерн Наблюдатель (Observer)
+        System.out.println("=== Паттерн Наблюдатель (Observer) ===");
+        NewsPublisher newsPublisher = new NewsPublisherImpl();
 
-        // Устанавливаем цепочку: A -> B -> C
-        paymentA.setNextHandler(paymentB);
-        paymentB.setNextHandler(paymentC);
+        // Добавляем подписчиков (наблюдателей)
+        newsPublisher.addObserver(new NewsSubscriberLaptop("Дана"));
+        newsPublisher.addObserver(new NewsSubscriberSmartphone("Улдана"));
+        newsPublisher.addObserver(new NewsSubscriberTablet("Данок"));
 
-        // Проверяем обработку платежа на сумму 210 долларов
-        System.out.println("Покупка на сумму 210 долларов:");
-        paymentA.handlePayment(210); // Вызываем обработку платежа
+        // Оповещаем подписчиков о новостях в разных категориях
+        newsPublisher.notifyObservers("Шоппинг", "покуупайте на на на");
+        newsPublisher.notifyObservers("Технологии", "SpaceX успешно запустила ракету!");
 
-        // 2. Паттерн команды (Command Pattern)
-        System.out.println("\n=== Паттерн команды для телевизора ===");
-        Television tv = new Television(); // Создаем объект телевизора
-        // Создаем команды для управления телевизором
-        TurnOnCommand turnOn = new TurnOnCommand(tv);
-        TurnOffCommand turnOff = new TurnOffCommand(tv);
-        VolumeUpCommand volumeUp = new VolumeUpCommand(tv);
-        VolumeDownCommand volumeDown = new VolumeDownCommand(tv);
-        NextChannelCommand nextChannel = new NextChannelCommand(tv);
-        PreviousChannelCommand previousChannel = new PreviousChannelCommand(tv);
+        System.out.println("\n");
 
-        // Создаем пульт управления и добавляем команды
-        RemoteControl remote = new RemoteControl();
-        remote.addCommand("TurnOn", turnOn);
-        remote.addCommand("TurnOff", turnOff);
-        remote.addCommand("VolumeUp", volumeUp);
-        remote.addCommand("VolumeDown", volumeDown);
-        remote.addCommand("NextChannel", nextChannel);
-        remote.addCommand("PreviousChannel", previousChannel);
+        // 2. Паттерн Состояние (State)
+        System.out.println("=== Паттерн Состояние (State) ===");
+        Player player = new Player();
 
-        // Проверяем выполнение команд
-        remote.pressButton("TurnOn");
-        remote.pressButton("VolumeUp");
-        remote.pressButton("NextChannel");
-        remote.pressButton("TurnOff");
-        remote.pressButton("NonExistentCommand"); // Пример несуществующей команды
+        // Проверяем работу мультимедийного плеера в разных состояниях
+        player.play();  // Воспроизведение
+        player.pause(); // Пауза
+        player.play();  // Возобновление
+        player.stop();  // Остановка
 
-        // 3. Итератор (Iterator Pattern)
-        // Создаем коллекцию фильмов на основе списка
-        ListMovieCollection listCollection = new ListMovieCollection();
-        listCollection.addMovie("Inception"); // Добавляем фильмы
-        listCollection.addMovie("The Matrix");
-        listCollection.addMovie("Interstellar");
+        System.out.println("\n");
 
-        // Создаем коллекцию фильмов на основе массива
-        String[] movieArray = {"Titanic", "Avatar", "The Godfather"};
-        ArrayMovieCollection arrayCollection = new ArrayMovieCollection(movieArray);
+        // 3. Паттерн Стратегия (Strategy)
+        System.out.println("=== Паттерн Стратегия (Strategy) ===");
+        Order order1 = new Order(new CardPaymentStrategy(), 1234);   // Оплата картой
+        Order order2 = new Order(new WalletPaymentStrategy(), 1234); // Оплата электронным кошельком
+        Order order3 = new Order(new CashOnDeliveryStrategy(), 1234); // Оплата при доставке
 
-        // Выводим фильмы из списка с использованием итератора
-        Iterator<String> listIterator = listCollection.createIterator();
-        System.out.println("Фильмы из списка:");
-        while (listIterator.hasNext()) {
-            System.out.println(listIterator.next()); // Проверяем наличие следующего фильма
-        }
+        // Рассчитываем итоговую стоимость заказа для разных способов оплаты
+        System.out.println("Цена при оплате картой: " + order1.calculateFinalPrice());
+        System.out.println("Цена при оплате электронным кошельком: " + order2.calculateFinalPrice());
+        System.out.println("Цена при оплате наложенным платежом: " + order3.calculateFinalPrice());
 
-        // Выводим фильмы из массива с использованием итератора
-        Iterator<String> arrayIterator = arrayCollection.createIterator();
-        System.out.println("\nФильмы из массива:");
-        while (arrayIterator.hasNext()) {
-            System.out.println(arrayIterator.next()); // Проверяем наличие следующего фильма
-        }
+        System.out.println("\n");
 
-        // 4. Посредник (Mediator Pattern)
-        HomeMediatorImpl mediator = new HomeMediatorImpl(); // Создаем медиатор
+        // 4. Паттерн Шаблонный метод (Template Method)
+        System.out.println("=== Паттерн Шаблонный метод (Template Method) ===");
 
-        // Создаем сенсоры
-        Sensor temperatureSensor = new TemperatureSensor();
-        Sensor humiditySensor = new HumiditySensor();
-        Sensor lightSensor = new LightSensor();
+        // Проверка качества продуктов
+        QualityCheck foodCheck = new FoodQualityCheck();
+        System.out.println("Проверка качества продуктов питания:");
+        foodCheck.checkProduct(); // Проверка продуктов питания
 
-        // Устанавливаем медиатор для сенсоров
-        temperatureSensor.setMediator(mediator);
-        humiditySensor.setMediator(mediator);
-        lightSensor.setMediator(mediator);
+        QualityCheck electronicsCheck = new ElectronicsQualityCheck();
+        System.out.println("\nПроверка качества электроники:");
+        electronicsCheck.checkProduct(); // Проверка электроники
 
-        // Обновляем данные сенсоров
-        temperatureSensor.updateData();
-        humiditySensor.updateData();
-        lightSensor.updateData();
+        System.out.println("\n");
 
-        // Выводим отчет по собранным данным
-        mediator.reportData();
+        // 5. Паттерн Посетитель (Visitor)
+        System.out.println("=== Паттерн Посетитель (Visitor) ===");
 
-        // 5. Паттерн снимка (Memento Pattern)
-        TextEditor editor = new TextEditor(); // Создаем текстовый редактор
-        Caretaker caretaker = new Caretaker(); // Создаем хранителя для снимков
+        // Сканируем файлы с помощью антивируса
+        TextFile textFile = new TextFile("Пример текстового файла.");
+        ExecutableFile executableFile = new ExecutableFile("Пример исполняемого файла.");
 
-        // Добавляем текст в редактор
-        editor.setText("Hello, World!");
-        // Сохраняем текущее состояние
-        caretaker.addMemento(editor.save());
+        Visitor antivirusVisitor = new AntivirusVisitor();
+        Visitor reportVisitor = new ReportVisitor();
 
-        // Добавляем больше текста
-        editor.setText("Hello, World! How are you?");
-        System.out.println("Текущий текст: " + editor.getText());
+        System.out.println("Антивирусное сканирование:");
+        textFile.accept(antivirusVisitor);         // Проверка текстового файла антивирусом
+        executableFile.accept(antivirusVisitor);   // Проверка исполняемого файла антивирусом
 
-        // Восстанавливаем предыдущее состояние
-        editor.restore(caretaker.getMemento(0));
-        System.out.println("Восстановленный текст: " + editor.getText());
+        System.out.println("\nГенерация отчётов:");
+        textFile.accept(reportVisitor);            // Генерация отчёта для текстового файла
+        executableFile.accept(reportVisitor);      // Генерация отчёта для исполняемого файла
     }
 }
