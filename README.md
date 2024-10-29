@@ -23,5 +23,3 @@ The project is divided into three main components:
 1. Clone the repository:
    ```bash
    git clone https://github.com/danayeos/sdp.git
-
-   
